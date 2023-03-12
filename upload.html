@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Files</title>
+</head>
+<body>
+    <input type="file" id="file-selector" multiple>
+    <br><br>
+    <div id="video-preview"></div>
+    <br><br>
+    <button type="button" onclick="uploadFiles()">Upload</button>
+    <script>
+        function uploadFiles() {
+            // Get the selected files
+            const files = document.getElementById("file-selector").files;
+            if (files.length == 0) {
+                alert("Please select one or more files.");
+                return;
+            }
+
+            // Create a FormData object to send the files
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append("file", files[i]);
+            }
+
+            // Send a POST request to the server to upload the files
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload");
+            xhr.onload = function() {
+                alert(xhr.responseText);
+            }
+            xhr.send(formData);
+        }
+
+        function previewVideo(file) {
+            // Create a video element to display the preview
+            const video = document.createElement("video");
+            video.width = 320;
+            video.height = 240;
+            video.controls = true;
+
+            // Set the source of the video element to the uploaded file
+            const url = URL.createObjectURL(file);
+            video.src = url;
+
+            // Add the video element to the preview div
+            const previewDiv = document.getElementById("video-preview");
+            previewDiv.appendChild(video);
+
+            // Release the object URL when the video has finished playing
+            video.onended = function() {
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        const fileSelector = document.getElementById("file-selector");
+        fileSelector.addEventListener("change", function() {
+            // Remove any existing video previews
+            const previewDiv = document.getElementById("video-preview");
+            while (previewDiv.firstChild) {
+                previewDiv.removeChild(previewDiv.firstChild);
+            }
+
+            // Preview each selected file that is a video
+            const files = fileSelector.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith("video/")) {
+                    previewVideo(file);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
